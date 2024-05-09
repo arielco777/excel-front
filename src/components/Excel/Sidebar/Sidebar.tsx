@@ -90,11 +90,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
 
     return (
-        <div className="bg-neutral-300 w-60 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-full -mt-10 h-screen">
+        <div className="bg-neutral-300 w-60 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-screen">
             <div className="w-full flex flex-col">
                 {fileTitle && (
-                    <div>
-                        <h1>{fileTitle}</h1>
+                    <div className="mx-auto mt-2">
+                        <h1 className="font-bold">{fileTitle}</h1>
                     </div>
                 )}
                 <form
@@ -247,7 +247,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={handleCloseDoc}
                 className="bg-red-500 py-2 hover:bg-red-400 text-lg mx-2 mb-2 rounded"
             >
-                Close
+                Close Document
             </button>
         </div>
     );
