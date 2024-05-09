@@ -10,7 +10,7 @@ import Sidebar from "../components/Excel/Sidebar/Sidebar";
 import Excel from "../components/Excel/Excel";
 import Dropzone from "../components/Excel/Dropzone";
 
-const serverUrl = "http://localhost:5000";
+const serverUrl = "https://excel-back-6o83.onrender.com";
 
 let uploaded = false;
 
