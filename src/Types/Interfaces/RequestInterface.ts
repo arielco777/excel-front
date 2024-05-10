@@ -6,6 +6,8 @@ export interface RequestType {
     headerColor?: string;
     delimiter?: string;
     docName?: string;
+    avgChosen?: boolean;
+    totalChosen?: boolean;
 }
 
 export interface ParsedCSVRow {

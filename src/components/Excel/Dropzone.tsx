@@ -32,7 +32,7 @@ const Dropzone: React.FC<DropzoneProp> = ({ fileChosen }) => {
 
     return (
         <div
-            className="border border-neutral-600 rounded-lg w-1/3 h-52 flex text-neutral-500 justify-center items-center hover:bg-neutral-200 transition-all"
+            className="cursor-pointer border border-neutral-600 rounded-lg w-1/3 h-52 flex text-neutral-500 justify-center items-center hover:bg-neutral-200 transition-all"
             {...getRootProps()}
         >
             <input {...getInputProps()} />

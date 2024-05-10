@@ -7,7 +7,7 @@ import {
 } from "../Types/Interfaces/RequestInterface";
 import { ResponseActionType } from "../Types/Enums/SidebarActions";
 import Sidebar from "../components/Excel/Sidebar/Sidebar";
-import Excel from "../components/Excel/Excel";
+import ExcelTable from "../components/Excel/ExcelComponent";
 import Dropzone from "../components/Excel/Dropzone";
 
 const serverUrl = "http://localhost:5000";
@@ -152,6 +152,8 @@ const ExcelPage = () => {
             }
             setHeaders(headers);
 
+            console.log("Parsed Data: ", parsedData);
+
             setParsedCSVFile(parsedData);
             setIsLoading(false);
         };
@@ -187,7 +189,14 @@ const ExcelPage = () => {
         try {
             setIsLoading(true);
 
-            const { desired, groupBy, sortBy, sortDir } = info;
+            const {
+                desired,
+                groupBy,
+                sortBy,
+                sortDir,
+                totalChosen,
+                avgChosen,
+            } = info;
 
             const formData = new FormData();
 
@@ -196,11 +205,14 @@ const ExcelPage = () => {
             formData.append("groupBy", groupBy);
             formData.append("sortBy", sortBy);
             formData.append("sortDir", sortDir);
+            formData.append("totalChosen", JSON.stringify(totalChosen));
+            formData.append("avgChosen", JSON.stringify(avgChosen));
 
             if (isCsv) {
                 if (info.delimiter) {
                     formData.append("delimiter", info.delimiter);
                 } else {
+                    setIsLoading(false);
                     return setErrorMessage("You need to choose the delimiter");
                 }
             }
@@ -250,7 +262,14 @@ const ExcelPage = () => {
     };
 
     return (
-        <div className="relative w-full flex-grow flex flex-col">
+        <div className="w-full flex-grow flex flex-col">
+            {isLoading && (
+                <div className="fixed z-50 w-screen h-screen left-0 top-0 bg-neutral-800/50 flex justify-center items-center">
+                    <div className="bg-neutral-200 px-40 py-20 rounded-lg text-3xl">
+                        Loading...
+                    </div>
+                </div>
+            )}
             {originalFile ? (
                 <div className="h-full">
                     {parsedCSVFile.length > 0 && (
@@ -260,24 +279,23 @@ const ExcelPage = () => {
                                 headers={originalHeaders}
                                 response={handleSidebarAction}
                                 csv={isCsv}
-                                loading={isLoading}
+                                isLoading={isLoading}
                             />
-                            <Excel headers={headers} file={parsedCSVFile} />
+                            <ExcelTable
+                                headers={headers}
+                                file={parsedCSVFile}
+                            />
                         </div>
                     )}
-                    {isLoading && (
-                        <div className="text-white text-3xl absolute left-0 top-0 z-5">
-                            Loading...
-                        </div>
-                    )}
+
                     {errorMessage && (
-                        <div className="fixed top-10 left-10 z-10 bg-white p-5 rounded-lg  text-red-500 flex justify-center items-center">
+                        <div className="fixed top-10 left-10 z-10 bg-red-500 p-5 rounded-lg  text-white flex justify-center items-center">
                             {errorMessage}
                             <button
-                                className="absolute top-0 right-0 text-black flex justify-center items-center bg-neutral-200 rounded-bl-lg rounded-tr-lg w-6 h-6 hover:bg-neutral-300"
+                                className="absolute -top-2 -right-2 text-black flex justify-center items-center bg-neutral-300 rounded-full w-7 h-7 hover:bg-neutral-400"
                                 onClick={() => setErrorMessage("")}
                             >
-                                <span>X</span>
+                                <span className="text-xl">X</span>
                             </button>
                         </div>
                     )}

@@ -11,7 +11,7 @@ interface ExcelProps {
     // headerColor: "white" | string;
 }
 
-const Excel: React.FC<ExcelProps> = ({
+const ExcelTable: React.FC<ExcelProps> = ({
     headers,
     file,
     // headerColor = "white",
@@ -57,4 +57,4 @@ const Excel: React.FC<ExcelProps> = ({
     );
 };
 
-export default Excel;
+export default ExcelTable;

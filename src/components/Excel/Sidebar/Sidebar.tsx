@@ -13,7 +13,7 @@ interface SidebarProps {
     response: (action: ResponseAction) => void;
     fileTitle: string;
     csv: boolean;
-    loading: boolean;
+    isLoading: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -21,11 +21,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     response,
     fileTitle,
     csv,
-    loading = false,
+    isLoading,
 }) => {
     const [desiredChosen, setDesiredChosen] = useState(false);
     const [groupChosen, setGroupChosen] = useState(false);
     const [sortChosen, setSortChosen] = useState(false);
+    const [totalChosen, setTotalChosen] = useState(false);
+    const [avgChosen, setAvgChosen] = useState(false);
 
     const [docName, setDocName] = useState("");
 
@@ -39,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             sortDir: { value: "asc" | "des" | undefined };
             sortBy: { value: string };
             desired: { selectedOptions: { value: string }[] };
+            avg: { selectedOptions: { value: string } };
         };
 
         const desired = desiredChosen
@@ -58,6 +61,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             sortBy,
             groupBy,
             desired,
+            totalChosen,
+            avgChosen,
         };
 
         if (csv) {
@@ -195,6 +200,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </option>
                         ))}
                     </select>
+                    <section className="">
+                        <h4 className="text-md">More Info</h4>
+                        <input
+                            type="checkbox"
+                            id="sum"
+                            name="sum"
+                            className="mr-1"
+                            onChange={() => setTotalChosen((prev) => !prev)}
+                        />
+                        <label htmlFor="sum">Total of each</label>
+                        <br />
+                        <input
+                            type="checkbox"
+                            id="avg"
+                            name="avg"
+                            className="mr-1"
+                            onChange={() => setAvgChosen((prev) => !prev)}
+                        />
+                        <label htmlFor="avg">Average of each</label>
+                    </section>
 
                     {/* <label htmlFor="headerColor">Header Color: </label>
                     <input id="headerColor" name="headerColor" type="color" /> */}
@@ -202,8 +227,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                         <div className="">
                             CSV Delimiter:
                             <select
+                                defaultValue={","}
                                 onChange={(e) => setDelimiter(e.target.value)}
                             >
+                                <option value="none" disabled>
+                                    Select delimiter
+                                </option>
                                 <option value=",">Comma (,)</option>
                                 <option value=";">Semicolumn (;)</option>
                                 <option value="|">Pipe (|)</option>
@@ -213,12 +242,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={isLoading}
                         className="bg-green-500 rounded py-1 hover:bg-green-400"
                     >
                         Submit
                     </button>
                 </form>
+
                 <form
                     className="text-black w-full flex flex-col gap-2 p-2"
                     onSubmit={handleDownload}
@@ -243,6 +273,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </button>
                 </form>
             </div>
+
             <button
                 onClick={handleCloseDoc}
                 className="bg-red-500 py-2 hover:bg-red-400 text-lg mx-2 mb-2 rounded"
