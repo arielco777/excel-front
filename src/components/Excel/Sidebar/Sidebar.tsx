@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./Sidebar.css";
 import { ResponseActionType } from "../../../Types/Enums/SidebarActions";
 import { RequestType } from "../../../Types/Interfaces/RequestInterface";
+import { Download } from "@mui/icons-material";
 
 interface ResponseAction {
     action: ResponseActionType;
@@ -29,17 +30,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [totalChosen, setTotalChosen] = useState(false);
     const [avgChosen, setAvgChosen] = useState(false);
 
-    const [docName, setDocName] = useState("");
-
-    const [delimiter, setDelimiter] = useState("");
+    const [delimiter, setDelimiter] = useState(",");
 
     const handleResponse = (e: React.SyntheticEvent) => {
         e.preventDefault();
         const target = e.target as typeof e.target & {
             groupBy: { value: string };
+            groupDir: { value: "asc" | "des" | undefined };
             headerColor: { value: string };
-            sortDir: { value: "asc" | "des" | undefined };
             sortBy: { value: string };
+            sortDir: { value: "asc" | "des" | undefined };
             desired: { selectedOptions: { value: string }[] };
             avg: { selectedOptions: { value: string } };
         };
@@ -49,24 +49,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                   (option) => option.value
               )
             : headers;
-        // const sortBy = Array.from(target.sortBy.selectedOptions).map(
-        //     (option) => option.value
-        // );
+        const groupBy = groupChosen ? target.groupBy.value : "none";
+        const groupDir = target.groupDir.value;
         const sortBy = sortChosen ? target.sortBy.value : "none";
         const sortDir = target.sortDir.value;
-        const groupBy = groupChosen ? target.groupBy.value : "none";
 
         const objects = {
             sortDir,
             sortBy,
             groupBy,
+            groupDir,
             desired,
             totalChosen,
             avgChosen,
         };
 
         if (csv) {
-            console.log("Delimiter: ", delimiter);
             objects["delimiter"] = delimiter;
         }
 
@@ -88,14 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         response({
             action: ResponseActionType.Download,
-            objects: {
-                docName,
-            },
+            objects: null,
         });
     };
 
     return (
-        <div className="bg-neutral-300 w-60 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-screen">
+        <div className="bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-200 w-64 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-screen">
             <div className="w-full flex flex-col">
                 {fileTitle && (
                     <div className="mx-auto mt-2">
@@ -104,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
                 <form
                     onSubmit={handleResponse}
-                    className="text-black w-full flex flex-col gap-2 p-2"
+                    className="w-full flex flex-col gap-2 p-2"
                 >
                     <div className="flex gap-3 items-center">
                         <label
@@ -117,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </label>
                         <input
                             type="checkbox"
+                            className="accent-blue-400 dark:accent-blue-600"
                             onChange={() => setDesiredChosen((prev) => !prev)}
                         />
                     </div>
@@ -126,6 +123,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                         multiple
                         disabled={!desiredChosen}
                         size={4}
+                        className={`${
+                            !desiredChosen
+                                ? "bg-neutral-200 dark:bg-neutral-200 dark:text-neutral-300"
+                                : "dark:bg-neutral-300 text-neutral-700"
+                        }`}
                         style={{
                             overflowY: !desiredChosen
                                 ? "-moz-hidden-unscrollable"
@@ -140,12 +142,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </select>
 
                     <div className="flex gap-3 items-center">
-                        <label
-                            htmlFor="groupBy"
-                            className={`${!groupChosen && "text-neutral-500"}`}
+                        <p
+                            className={`${
+                                !groupChosen &&
+                                "text-neutral-500 dark:text-neutral-500"
+                            } flex gap-1`}
                         >
-                            Group By:
-                        </label>
+                            Group
+                            <select
+                                className={`pl-1 py-0.5 rounded ${
+                                    groupChosen
+                                        ? "dark:text-neutral-300 bg-neutral-500"
+                                        : "dark:text-neutral-500 bg-neutral-600"
+                                }`}
+                                name="groupDir"
+                                disabled={!groupChosen}
+                            >
+                                <option value="asc">Ascending</option>
+                                <option value="des">Descending</option>
+                            </select>
+                        </p>
                         <input
                             type="checkbox"
                             onChange={() => setGroupChosen((prev) => !prev)}
@@ -168,8 +184,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                         ))}
                     </select>
                     <div className="flex gap-3 items-center">
-                        <p className={`${!sortChosen && "text-neutral-500"}`}>
-                            Sort{" "}
+                        <p
+                            className={`${
+                                !sortChosen && "text-neutral-500"
+                            } flex gap-1`}
+                        >
+                            Sort
                             <select
                                 className="pl-1 py-0.5 rounded"
                                 name="sortDir"
@@ -201,7 +221,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         ))}
                     </select>
                     <section className="">
-                        <h4 className="text-md">More Info</h4>
+                        <h4 className="text-md">More Column Info</h4>
                         <input
                             type="checkbox"
                             id="sum"
@@ -209,7 +229,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             className="mr-1"
                             onChange={() => setTotalChosen((prev) => !prev)}
                         />
-                        <label htmlFor="sum">Total of each</label>
+                        <label htmlFor="sum">Sum</label>
                         <br />
                         <input
                             type="checkbox"
@@ -218,7 +238,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             className="mr-1"
                             onChange={() => setAvgChosen((prev) => !prev)}
                         />
-                        <label htmlFor="avg">Average of each</label>
+                        <label htmlFor="avg">Average</label>
                     </section>
 
                     {/* <label htmlFor="headerColor">Header Color: </label>
@@ -249,29 +269,27 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </button>
                 </form>
 
-                <form
+                {/* <form
                     className="text-black w-full flex flex-col gap-2 p-2"
                     onSubmit={handleDownload}
-                >
-                    <div className="flex flex-col">
-                        <label htmlFor="docName" className="">
-                            Document Name:
-                        </label>
+                > */}
+                {/* <div className="flex flex-col">
                         <input
                             id="docName"
                             name="docName"
-                            placeholder="Default: output"
+                            placeholder="Document name"
                             className="rounded py-0.5 px-1"
                             onChange={(e) => setDocName(e.target.value)}
                         />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 rounded py-1 hover:bg-blue-400 text-black"
-                    >
-                        Download
-                    </button>
-                </form>
+                    </div> */}
+                <button
+                    type="submit"
+                    onClick={handleDownload}
+                    className="bg-blue-500 rounded py-1 hover:bg-blue-400 text-black mx-2"
+                >
+                    <Download />
+                </button>
+                {/* </form> */}
             </div>
 
             <button

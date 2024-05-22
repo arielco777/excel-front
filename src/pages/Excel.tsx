@@ -7,8 +7,11 @@ import {
 } from "../Types/Interfaces/RequestInterface";
 import { ResponseActionType } from "../Types/Enums/SidebarActions";
 import Sidebar from "../components/Excel/Sidebar/Sidebar";
-import ExcelTable from "../components/Excel/ExcelComponent";
-import Dropzone from "../components/Excel/Dropzone";
+
+import Dropzone from "../components/Excel/Dropzone/Dropzone";
+import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
+import Hero from "../components/Home/Hero/Hero";
+import { Close, DarkMode, LightMode } from "@mui/icons-material";
 
 const serverUrl = "http://localhost:5000";
 
@@ -25,8 +28,13 @@ const ExcelPage = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
+    const [showDownload, setShowDownload] = useState(false);
+    const [downloadName, setDownloadName] = useState("");
+
     const [headers, setHeaders] = useState<string[]>([]);
     const [parsedCSVFile, setParsedCSVFile] = useState<ParsedCSVRow[]>([]);
+
+    const [darkMode, setDarkMode] = useState(false);
 
     const topBar = useRef<HTMLDivElement>(null);
 
@@ -60,7 +68,7 @@ const ExcelPage = () => {
                 }
                 break;
             case ResponseActionType.Download:
-                downloadFile(fileToDownload, data.objects.docName);
+                setShowDownload(true);
                 break;
         }
     };
@@ -185,28 +193,18 @@ const ExcelPage = () => {
     };
 
     const handleFileManagement = async (info: RequestType) => {
-        // return;
         try {
             setIsLoading(true);
-
-            const {
-                desired,
-                groupBy,
-                sortBy,
-                sortDir,
-                totalChosen,
-                avgChosen,
-            } = info;
-
             const formData = new FormData();
 
             formData.append("file", originalFile);
-            formData.append("desired", JSON.stringify(desired));
-            formData.append("groupBy", groupBy);
-            formData.append("sortBy", sortBy);
-            formData.append("sortDir", sortDir);
-            formData.append("totalChosen", JSON.stringify(totalChosen));
-            formData.append("avgChosen", JSON.stringify(avgChosen));
+            Object.entries(info).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    formData.append(key, JSON.stringify(value));
+                } else {
+                    formData.append(key, value.toString());
+                }
+            });
 
             if (isCsv) {
                 if (info.delimiter) {
@@ -243,18 +241,21 @@ const ExcelPage = () => {
                 .catch((error) => console.error("Error Testing File: ", error));
         } catch (err) {
             console.error("Error uploading: ", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const downloadFile = async (file: File, docName: string) => {
-        const blob = new Blob([file], {
+    const downloadFile = async (e) => {
+        e.preventDefault();
+        const blob = new Blob([fileToDownload], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `${
-            docName.trim() !== "" ? docName.trim() : "output"
+            downloadName.trim() !== "" ? downloadName.trim() : "output"
         }.xlsx`;
         document.body.appendChild(a);
         a.click();
@@ -262,7 +263,7 @@ const ExcelPage = () => {
     };
 
     return (
-        <div className="w-full flex-grow flex flex-col">
+        <div className={`w-full flex-grow flex flex-col ${darkMode && "dark"}`}>
             {isLoading && (
                 <div className="fixed z-50 w-screen h-screen left-0 top-0 bg-neutral-800/50 flex justify-center items-center">
                     <div className="bg-neutral-200 px-40 py-20 rounded-lg text-3xl">
@@ -289,7 +290,7 @@ const ExcelPage = () => {
                     )}
 
                     {errorMessage && (
-                        <div className="fixed top-10 left-10 z-10 bg-red-500 p-5 rounded-lg  text-white flex justify-center items-center">
+                        <div className="fixed top-10 left-10 z-10 bg-red-500 p-5 rounded-lg text-white flex justify-center items-center">
                             {errorMessage}
                             <button
                                 className="absolute -top-2 -right-2 text-black flex justify-center items-center bg-neutral-300 rounded-full w-7 h-7 hover:bg-neutral-400"
@@ -299,12 +300,57 @@ const ExcelPage = () => {
                             </button>
                         </div>
                     )}
+                    {showDownload && (
+                        <div className="fixed z-50 bg-black/60 top-0 left-0 w-screen h-screen flex justify-center items-center">
+                            <form
+                                className="bg-neutral-300 p-4 flex flex-col relative rounded overflow-hidden"
+                                onSubmit={downloadFile}
+                            >
+                                <label htmlFor="file-name">File Name</label>
+                                <input
+                                    placeholder="Default output"
+                                    className="px-2 py-1 rounded focus:outline-none border mt-1"
+                                    name="file-name"
+                                    id="file-name"
+                                    onChange={(e) =>
+                                        setDownloadName(e.target.value)
+                                    }
+                                />
+                                <button
+                                    type="submit"
+                                    className="mt-3 bg-blue-600 rounded py-1 hover:bg-blue-500 transition "
+                                >
+                                    Download
+                                </button>
+                                <button
+                                    onClick={() => setShowDownload(false)}
+                                    type="button"
+                                    className="absolute right-0 top-0 hover:bg-red-400 bg-red-500 rounded-bl flex justify-center items-center p-0.5 transition duration-75"
+                                >
+                                    {" "}
+                                    <Close />
+                                </button>
+                            </form>
+                        </div>
+                    )}
                 </div>
             ) : (
-                <div ref={topBar} className="flex flex-col items-center h-full">
-                    <Dropzone fileChosen={handleFileUpload} />
+                <div
+                    ref={topBar}
+                    className="flex flex-col items-center justify-center h-full w-full "
+                >
+                    <Hero />
+                    <div className="w-1/2 h-1/4">
+                        <Dropzone fileChosen={handleFileUpload} />
+                    </div>
                 </div>
             )}
+            <button
+                className="absolute top-0 right-0 dark:text-white"
+                onClick={() => setDarkMode((prev) => !prev)}
+            >
+                {darkMode ? <LightMode /> : <DarkMode />}
+            </button>
         </div>
     );
 };
