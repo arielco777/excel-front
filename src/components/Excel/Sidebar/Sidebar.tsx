@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "./Sidebar.css";
 import { ResponseActionType } from "../../../Types/Enums/SidebarActions";
 import { RequestType } from "../../../Types/Interfaces/RequestInterface";
 import { Download } from "@mui/icons-material";
+import MultipleSelect from "../../Inputs/MultipleSelect";
 
 interface ResponseAction {
     action: ResponseActionType;
@@ -30,6 +30,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [totalChosen, setTotalChosen] = useState(false);
     const [avgChosen, setAvgChosen] = useState(false);
 
+    const [desiredItems, setDesiredItems] = useState<string[]>();
+
     const [delimiter, setDelimiter] = useState(",");
 
     const handleResponse = (e: React.SyntheticEvent) => {
@@ -40,15 +42,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             headerColor: { value: string };
             sortBy: { value: string };
             sortDir: { value: "asc" | "des" | undefined };
-            desired: { selectedOptions: { value: string }[] };
             avg: { selectedOptions: { value: string } };
         };
 
-        const desired = desiredChosen
-            ? Array.from(target.desired.selectedOptions).map(
-                  (option) => option.value
-              )
-            : headers;
+        const desired = desiredChosen ? desiredItems : headers;
         const groupBy = groupChosen ? target.groupBy.value : "none";
         const groupDir = target.groupDir.value;
         const sortBy = sortChosen ? target.sortBy.value : "none";
@@ -91,8 +88,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
 
     return (
-        <div className="bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-200 w-64 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-screen">
-            <div className="w-full flex flex-col">
+        <div className="flex h-screen w-64 flex-col justify-between overflow-hidden text-ellipsis border-r border-neutral-300 bg-neutral-100 text-black dark:border-neutral-500 dark:bg-neutral-800 dark:text-neutral-200">
+            <div className="flex w-full flex-col">
                 {fileTitle && (
                     <div className="mx-auto mt-2">
                         <h1 className="font-bold">{fileTitle}</h1>
@@ -100,153 +97,166 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
                 <form
                     onSubmit={handleResponse}
-                    className="w-full flex flex-col gap-2 p-2"
+                    className="flex w-full flex-col gap-5 p-2"
                 >
-                    <div className="flex gap-3 items-center">
-                        <label
-                            htmlFor="desired"
-                            className={`${
-                                !desiredChosen && "text-neutral-500"
-                            }`}
-                        >
-                            Desired Columns:{" "}
-                        </label>
-                        <input
-                            type="checkbox"
-                            className="accent-blue-400 dark:accent-blue-600"
-                            onChange={() => setDesiredChosen((prev) => !prev)}
-                        />
-                    </div>
-                    <select
-                        name="desired"
-                        id="desired"
-                        multiple
-                        disabled={!desiredChosen}
-                        size={4}
-                        className={`${
-                            !desiredChosen
-                                ? "bg-neutral-200 dark:bg-neutral-200 dark:text-neutral-300"
-                                : "dark:bg-neutral-300 text-neutral-700"
-                        }`}
-                        style={{
-                            overflowY: !desiredChosen
-                                ? "-moz-hidden-unscrollable"
-                                : "auto",
-                        }}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="flex gap-3 items-center">
-                        <p
-                            className={`${
-                                !groupChosen &&
-                                "text-neutral-500 dark:text-neutral-500"
-                            } flex gap-1`}
-                        >
-                            Group
-                            <select
-                                className={`pl-1 py-0.5 rounded ${
-                                    groupChosen
-                                        ? "dark:text-neutral-300 bg-neutral-500"
-                                        : "dark:text-neutral-500 bg-neutral-600"
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <label
+                                htmlFor="desired"
+                                className={`${
+                                    !desiredChosen && "text-neutral-500"
                                 }`}
-                                name="groupDir"
-                                disabled={!groupChosen}
                             >
-                                <option value="asc">Ascending</option>
-                                <option value="des">Descending</option>
-                            </select>
-                        </p>
-                        <input
-                            type="checkbox"
-                            onChange={() => setGroupChosen((prev) => !prev)}
+                                Desired Columns:{" "}
+                            </label>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() =>
+                                    setDesiredChosen((prev) => !prev)
+                                }
+                            />
+                        </div>
+                        {/* {memoizedMultipleSelect} */}
+                        <MultipleSelect
+                            disabled={!desiredChosen}
+                            options={headers}
+                            setItems={setDesiredItems}
                         />
                     </div>
-                    <select
-                        disabled={!groupChosen}
-                        name="groupBy"
-                        id="groupBy"
-                        className={`${
-                            groupChosen
-                                ? "bg-white"
-                                : "bg-neutral-200 text-neutral-500"
-                        } py-1 px-1 rounded cursor-pointer hover:bg-neutral-200`}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="flex gap-3 items-center">
-                        <p
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <p
+                                className={`${
+                                    !groupChosen
+                                        ? "text-neutral-400 dark:text-neutral-500"
+                                        : "text-neutral-800 dark:text-neutral-200"
+                                } flex gap-1`}
+                            >
+                                Group
+                                <select
+                                    className={`${
+                                        groupChosen
+                                            ? "cursor-pointer bg-white hover:bg-neutral-200 dark:bg-neutral-500 dark:text-neutral-200 dark:hover:bg-neutral-400"
+                                            : "bg-neutral-200 dark:bg-neutral-600 dark:text-neutral-500"
+                                    } rounded border border-neutral-300 py-0.5 pl-1 dark:border-neutral-700 `}
+                                    name="groupDir"
+                                    disabled={!groupChosen}
+                                >
+                                    <option value="asc">Ascending</option>
+                                    <option value="des">Descending</option>
+                                </select>
+                            </p>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() => setGroupChosen((prev) => !prev)}
+                            />
+                        </div>
+                        <select
+                            disabled={!groupChosen}
+                            name="groupBy"
+                            id="groupBy"
                             className={`${
-                                !sortChosen && "text-neutral-500"
-                            } flex gap-1`}
+                                groupChosen
+                                    ? "cursor-pointer bg-white hover:bg-neutral-200 dark:bg-neutral-500 dark:hover:bg-neutral-400"
+                                    : "bg-neutral-200 text-neutral-400 dark:bg-neutral-600"
+                            }  rounded border border-neutral-300 px-1 py-1 dark:border-neutral-700`}
                         >
-                            Sort
-                            <select
-                                className="pl-1 py-0.5 rounded"
-                                name="sortDir"
-                                disabled={!sortChosen}
-                            >
-                                <option value="asc">Ascending</option>
-                                <option value="des">Descending</option>
-                            </select>
-                        </p>
-                        <input
-                            type="checkbox"
-                            onChange={() => setSortChosen((prev) => !prev)}
-                        />
+                            {headers.map((item) => (
+                                <option value={item} key={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <select
-                        disabled={!sortChosen}
-                        name="sortBy"
-                        id="sortBy"
-                        className={`${
-                            sortChosen
-                                ? "bg-white"
-                                : "bg-neutral-200 text-neutral-500"
-                        } py-1 px-1 rounded cursor-pointer hover:bg-neutral-200`}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-                    <section className="">
-                        <h4 className="text-md">More Column Info</h4>
-                        <input
-                            type="checkbox"
-                            id="sum"
-                            name="sum"
-                            className="mr-1"
-                            onChange={() => setTotalChosen((prev) => !prev)}
-                        />
-                        <label htmlFor="sum">Sum</label>
-                        <br />
-                        <input
-                            type="checkbox"
-                            id="avg"
-                            name="avg"
-                            className="mr-1"
-                            onChange={() => setAvgChosen((prev) => !prev)}
-                        />
-                        <label htmlFor="avg">Average</label>
-                    </section>
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <p
+                                className={`${
+                                    !sortChosen
+                                        ? "text-neutral-400 dark:text-neutral-500"
+                                        : "text-neutral-800 dark:text-neutral-200"
+                                } flex gap-1`}
+                            >
+                                Sort
+                                <select
+                                    className={`${
+                                        sortChosen
+                                            ? "cursor-pointer bg-white hover:bg-neutral-200 dark:bg-neutral-500 dark:text-neutral-200 dark:hover:bg-neutral-400"
+                                            : "bg-neutral-200 dark:bg-neutral-600 dark:text-neutral-500"
+                                    } rounded border border-neutral-300 py-0.5 pl-1 dark:border-neutral-700 `}
+                                    name="sortDir"
+                                    disabled={!sortChosen}
+                                >
+                                    <option value="asc">Ascending</option>
+                                    <option value="des">Descending</option>
+                                </select>
+                            </p>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() => setSortChosen((prev) => !prev)}
+                            />
+                        </div>
+                        <select
+                            disabled={!sortChosen}
+                            name="sortBy"
+                            id="sortBy"
+                            className={`${
+                                sortChosen
+                                    ? "cursor-pointer bg-white hover:bg-neutral-200 dark:bg-neutral-500 dark:hover:bg-neutral-400"
+                                    : "bg-neutral-200 text-neutral-400 dark:bg-neutral-600"
+                            }  rounded border border-neutral-300 px-1 py-1  dark:border-neutral-700`}
+                        >
+                            {headers.map((item) => (
+                                <option value={item} key={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="">
+                        <h4 className="text-lg">More Column Info</h4>
+                        <div className="w-max  rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                            <input
+                                type="checkbox"
+                                id="sum"
+                                name="sum"
+                                className="mr-1 cursor-pointer"
+                                onChange={() => setTotalChosen((prev) => !prev)}
+                            />
+                            <label
+                                htmlFor="sum"
+                                className="cursor-pointer select-none"
+                            >
+                                Sum
+                            </label>
+                        </div>
+                        <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                            <input
+                                type="checkbox"
+                                id="avg"
+                                name="avg"
+                                className="mr-1 cursor-pointer"
+                                onChange={() => setAvgChosen((prev) => !prev)}
+                            />
+                            <label
+                                htmlFor="avg"
+                                className="cursor-pointer select-none"
+                            >
+                                Average
+                            </label>
+                        </div>
+                    </div>
 
                     {/* <label htmlFor="headerColor">Header Color: </label>
                     <input id="headerColor" name="headerColor" type="color" /> */}
                     {csv && (
                         <div className="">
-                            CSV Delimiter:
+                            <span className="text-lg">CSV Delimiter:</span>
                             <select
+                                className="cursor-pointer rounded border border-neutral-300 bg-white px-1 py-1 hover:bg-neutral-200 dark:border-neutral-700 dark:bg-neutral-500 dark:text-neutral-200  dark:hover:bg-neutral-400"
                                 defaultValue={","}
                                 onChange={(e) => setDelimiter(e.target.value)}
                             >
@@ -263,7 +273,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-green-500 rounded py-1 hover:bg-green-400"
+                        className="rounded bg-green-500 py-1 hover:bg-green-400 dark:bg-green-600 dark:text-black dark:hover:bg-green-500"
                     >
                         Submit
                     </button>
@@ -285,7 +295,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                     type="submit"
                     onClick={handleDownload}
-                    className="bg-blue-500 rounded py-1 hover:bg-blue-400 text-black mx-2"
+                    className="mx-2 rounded bg-blue-500 py-1 text-black hover:bg-blue-400"
                 >
                     <Download />
                 </button>
@@ -294,7 +304,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             <button
                 onClick={handleCloseDoc}
-                className="bg-red-500 py-2 hover:bg-red-400 text-lg mx-2 mb-2 rounded"
+                className="mx-2 mb-2 rounded bg-red-500 py-2 text-lg hover:bg-red-400"
             >
                 Close Document
             </button>

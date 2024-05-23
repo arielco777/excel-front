@@ -13,7 +13,7 @@ const Dropzone: React.FC<DropzoneProp> = ({ fileChosen }) => {
                 console.log("Only xls, xlsx, and csv extensions are allowed");
             else fileChosen(file);
         },
-        [fileChosen]
+        [fileChosen],
     );
     const onError = (err) => {
         console.log("Error on drop: ", err);
@@ -32,19 +32,23 @@ const Dropzone: React.FC<DropzoneProp> = ({ fileChosen }) => {
 
     return (
         <div
-            className="cursor-pointer border border-neutral-600 rounded-lg w-full h-full flex text-neutral-500 justify-center items-center hover:bg-neutral-200 transition-all"
+            className="flex h-full w-full cursor-pointer items-center justify-center rounded-lg border border-neutral-600 text-neutral-500 transition-all hover:bg-neutral-200 dark:border-neutral-400 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-900"
             {...getRootProps()}
         >
             <input {...getInputProps()} />
-
             <div
-                className={`w-full h-full rounded-lg text-xl font-medium ${
+                className={`h-full w-full rounded-lg text-xl font-medium ${
                     isDragActive && "bg-blue-100"
-                } transition flex justify-center items-center text-center p-5 select-none`}
+                } flex select-none items-center justify-center p-5 text-center transition`}
             >
-                {isDragActive
-                    ? "Drop the files here ... "
-                    : "Drag'n'drop Excel file here or click to select files"}
+                {isDragActive ? (
+                    "Drop the files here ... "
+                ) : (
+                    <span>
+                        Drag'n'Drop <u>xlsx</u>, <u>xls</u>, or <u>csv</u> file
+                        here or click to select files
+                    </span>
+                )}
             </div>
         </div>
     );

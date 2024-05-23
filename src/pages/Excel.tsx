@@ -34,7 +34,7 @@ const ExcelPage = () => {
     const [headers, setHeaders] = useState<string[]>([]);
     const [parsedCSVFile, setParsedCSVFile] = useState<ParsedCSVRow[]>([]);
 
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
 
     const topBar = useRef<HTMLDivElement>(null);
 
@@ -97,7 +97,7 @@ const ExcelPage = () => {
             parseFile(file);
         } else {
             setErrorMessage(
-                "Your chosen file isn't a CSV or Excel file extension."
+                "Your chosen file isn't a CSV or Excel file extension.",
             );
         }
     };
@@ -263,18 +263,20 @@ const ExcelPage = () => {
     };
 
     return (
-        <div className={`w-full flex-grow flex flex-col ${darkMode && "dark"}`}>
+        <div
+            className={`flex w-full flex-grow flex-col ${darkMode && "dark"} overflow-x-hidden`}
+        >
             {isLoading && (
-                <div className="fixed z-50 w-screen h-screen left-0 top-0 bg-neutral-800/50 flex justify-center items-center">
-                    <div className="bg-neutral-200 px-40 py-20 rounded-lg text-3xl">
+                <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-neutral-800/50">
+                    <div className="rounded-lg bg-neutral-200 px-40 py-20 text-3xl">
                         Loading...
                     </div>
                 </div>
             )}
             {originalFile ? (
-                <div className="h-full">
-                    {parsedCSVFile.length > 0 && (
-                        <div className="flex w-full h-full">
+                <div className="h-full dark:bg-neutral-800">
+                    {parsedCSVFile.length > 0 ? (
+                        <div className="flex h-full w-full">
                             <Sidebar
                                 fileTitle={fileTitle}
                                 headers={originalHeaders}
@@ -287,13 +289,24 @@ const ExcelPage = () => {
                                 file={parsedCSVFile}
                             />
                         </div>
+                    ) : (
+                        <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-neutral-800/50">
+                            <div className="rounded-lg bg-neutral-200 px-40 py-20 text-center text-3xl">
+                                Loading.
+                                <br />{" "}
+                                <span className="text-md">
+                                    If your file is in xlsx or xls, try
+                                    converting it to csv...
+                                </span>
+                            </div>
+                        </div>
                     )}
 
                     {errorMessage && (
-                        <div className="fixed top-10 left-10 z-10 bg-red-500 p-5 rounded-lg text-white flex justify-center items-center">
+                        <div className="fixed left-10 top-10 z-10 flex items-center justify-center rounded-lg bg-red-500 p-5 text-white">
                             {errorMessage}
                             <button
-                                className="absolute -top-2 -right-2 text-black flex justify-center items-center bg-neutral-300 rounded-full w-7 h-7 hover:bg-neutral-400"
+                                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-black hover:bg-neutral-400"
                                 onClick={() => setErrorMessage("")}
                             >
                                 <span className="text-xl">X</span>
@@ -301,33 +314,37 @@ const ExcelPage = () => {
                         </div>
                     )}
                     {showDownload && (
-                        <div className="fixed z-50 bg-black/60 top-0 left-0 w-screen h-screen flex justify-center items-center">
+                        <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-black/60">
                             <form
-                                className="bg-neutral-300 p-4 flex flex-col relative rounded overflow-hidden"
+                                className="relative flex flex-col overflow-hidden rounded border bg-neutral-100 p-4 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                                 onSubmit={downloadFile}
                             >
                                 <label htmlFor="file-name">File Name</label>
-                                <input
-                                    placeholder="Default output"
-                                    className="px-2 py-1 rounded focus:outline-none border mt-1"
-                                    name="file-name"
-                                    id="file-name"
-                                    onChange={(e) =>
-                                        setDownloadName(e.target.value)
-                                    }
-                                />
+                                <div className="flex items-end gap-0.5">
+                                    <input
+                                        placeholder="Default: output"
+                                        className="mt-1 rounded border px-2 py-1 focus:outline-none dark:border-neutral-500 dark:bg-neutral-600 dark:text-neutral-300"
+                                        name="file-name"
+                                        id="file-name"
+                                        onChange={(e) =>
+                                            setDownloadName(e.target.value)
+                                        }
+                                    />
+                                    <p className="text-neutral-600 dark:text-neutral-300">
+                                        .xlsx
+                                    </p>
+                                </div>
                                 <button
                                     type="submit"
-                                    className="mt-3 bg-blue-600 rounded py-1 hover:bg-blue-500 transition "
+                                    className="mt-3 rounded bg-blue-600 py-1 text-white transition hover:bg-blue-500"
                                 >
                                     Download
                                 </button>
                                 <button
                                     onClick={() => setShowDownload(false)}
                                     type="button"
-                                    className="absolute right-0 top-0 hover:bg-red-400 bg-red-500 rounded-bl flex justify-center items-center p-0.5 transition duration-75"
+                                    className="absolute right-0 top-0 flex items-center justify-center rounded-bl bg-red-500 p-0.5 text-neutral-300 transition duration-75 hover:bg-red-300"
                                 >
-                                    {" "}
                                     <Close />
                                 </button>
                             </form>
@@ -335,21 +352,24 @@ const ExcelPage = () => {
                     )}
                 </div>
             ) : (
+                // TODO: Make this a component or something and add more info
                 <div
                     ref={topBar}
-                    className="flex flex-col items-center justify-center h-full w-full "
+                    className="flex h-full w-full flex-col items-center justify-center pb-64 dark:bg-neutral-700"
                 >
-                    <Hero />
-                    <div className="w-1/2 h-1/4">
+                    <div className="w-full grow">
+                        <Hero />
+                    </div>
+                    <div className="h-1/3 w-1/2">
                         <Dropzone fileChosen={handleFileUpload} />
                     </div>
                 </div>
             )}
             <button
-                className="absolute top-0 right-0 dark:text-white"
+                className="absolute bottom-5 right-5 rounded-full bg-neutral-300 p-1.5 hover:bg-neutral-200 dark:bg-neutral-600 dark:text-white dark:hover:bg-neutral-500"
                 onClick={() => setDarkMode((prev) => !prev)}
             >
-                {darkMode ? <LightMode /> : <DarkMode />}
+                {darkMode ? <DarkMode /> : <LightMode />}
             </button>
         </div>
     );
