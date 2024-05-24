@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { SyntheticEvent, useRef, useState } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import {
@@ -7,14 +7,27 @@ import {
 } from "../Types/Interfaces/RequestInterface";
 import { ResponseActionType } from "../Types/Enums/SidebarActions";
 import Sidebar from "../components/Excel/Sidebar/Sidebar";
-import Excel from "../components/Excel/Excel";
-import Dropzone from "../components/Excel/Dropzone";
 
+<<<<<<< HEAD
 const serverUrl = "https://excel-back-6o83.onrender.com";
+=======
+import Dropzone from "../components/Excel/Dropzone/Dropzone";
+import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
+import Hero from "../components/Home/Hero/Hero";
+import { Close, DarkMode, LightMode } from "@mui/icons-material";
+import { checkEnv } from "../../util/envcheck";
+>>>>>>> dev
 
+// const serverUrl = "http://localhost:5000";
 let uploaded = false;
 
+interface SideBarActionProp {
+    action: ResponseActionType;
+    objects: RequestType;
+}
+
 const ExcelPage = () => {
+    const serverUrl = checkEnv("VITE_SERVER_URL");
     const [originalFile, setOriginalFile] = useState<File | undefined>();
     const [originalHeaders, setOriginalHeaders] = useState<string[]>([]);
 
@@ -25,11 +38,19 @@ const ExcelPage = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
+    const [showDownload, setShowDownload] = useState(false);
+    const [downloadName, setDownloadName] = useState("");
+
     const [headers, setHeaders] = useState<string[]>([]);
     const [parsedCSVFile, setParsedCSVFile] = useState<ParsedCSVRow[]>([]);
 
+    const [darkMode, setDarkMode] = useState(true);
+
     const topBar = useRef<HTMLDivElement>(null);
 
+    /**
+     * Resets the Excel app
+     */
     const reset = () => {
         uploaded = false;
         setOriginalFile(undefined);
@@ -44,12 +65,12 @@ const ExcelPage = () => {
         setParsedCSVFile([]);
     };
 
-    const handleSidebarAction = (data: {
-        action: ResponseActionType;
-        objects: RequestType;
-    }) => {
+    /**
+     *
+     * @param {SideBarActionProp} data
+     */
+    const handleSidebarAction = (data: SideBarActionProp) => {
         setErrorMessage("");
-        // console.log("Data: ", data);
         switch (data.action) {
             case ResponseActionType.Close:
                 reset();
@@ -60,11 +81,16 @@ const ExcelPage = () => {
                 }
                 break;
             case ResponseActionType.Download:
-                downloadFile(fileToDownload, data.objects.docName);
+                setShowDownload(true);
                 break;
         }
     };
 
+    /**
+     *
+     * @param {File} file
+     * @returns
+     */
     const handleFileUpload = async (file: File) => {
         reset();
         uploaded = true;
@@ -77,23 +103,22 @@ const ExcelPage = () => {
         setOriginalFile(file);
         setOriginalHeaders([]);
 
-        if (
-            file.name.includes(".xls") ||
-            file.name.includes(".xlsx")
-            // file?.type.split("/")[1].includes("spreadsheetml") ||
-            // file?.type.split("/")[1].includes("ms-excel")
-        ) {
+        if (file.name.includes(".xls") || file.name.includes(".xlsx")) {
             excelToCsv(file);
         } else if (file?.type.split("/")[1] === "csv") {
             setIsCsv(true);
             parseFile(file);
         } else {
             setErrorMessage(
-                "Your chosen file isn't a CSV or Excel file extension."
+                "Your chosen file isn't a CSV or Excel file extension.",
             );
         }
     };
 
+    /**
+     *
+     * @param {File} file
+     */
     const excelToCsv = (file: File) => {
         const reader = new FileReader();
 
@@ -129,6 +154,10 @@ const ExcelPage = () => {
         reader.readAsArrayBuffer(file);
     };
 
+    /**
+     *
+     * @param {File} file
+     */
     const parseFile = (file: File) => {
         // console.log("File: ", file);
         const reader = new FileReader();
@@ -152,6 +181,8 @@ const ExcelPage = () => {
             }
             setHeaders(headers);
 
+            console.log("Parsed Data: ", parsedData);
+
             setParsedCSVFile(parsedData);
             setIsLoading(false);
         };
@@ -159,6 +190,11 @@ const ExcelPage = () => {
         reader.readAsText(file);
     };
 
+    /**
+     *
+     * @param{RequestType} info
+     * @returns {void}
+     */
     const checkAndFormData = (info: RequestType) => {
         const { desired, groupBy, sortBy } = info;
         // Group Items check
@@ -168,39 +204,43 @@ const ExcelPage = () => {
             !desired.includes(groupBy)
         ) {
             setErrorMessage("Your Group By isn't in the Desired List");
-            return;
         }
         // Sort Items check
-        if (
+        else if (
             sortBy !== "none" &&
             desired.length > 0 &&
             !desired.includes(sortBy)
         ) {
             setErrorMessage("Your Sorty By isn't in the Desired List");
-            return;
+        } else {
+            handleFileManagement(info);
         }
-        handleFileManagement(info);
     };
 
+    /**
+     *
+     * @param {RequestType} info
+     * @returns {Promise<void>}
+     */
     const handleFileManagement = async (info: RequestType) => {
-        // return;
         try {
             setIsLoading(true);
-
-            const { desired, groupBy, sortBy, sortDir } = info;
-
             const formData = new FormData();
 
             formData.append("file", originalFile);
-            formData.append("desired", JSON.stringify(desired));
-            formData.append("groupBy", groupBy);
-            formData.append("sortBy", sortBy);
-            formData.append("sortDir", sortDir);
+            Object.entries(info).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    formData.append(key, JSON.stringify(value));
+                } else {
+                    formData.append(key, value.toString());
+                }
+            });
 
             if (isCsv) {
                 if (info.delimiter) {
                     formData.append("delimiter", info.delimiter);
                 } else {
+                    setIsLoading(false);
                     return setErrorMessage("You need to choose the delimiter");
                 }
             }
@@ -212,6 +252,10 @@ const ExcelPage = () => {
         }
     };
 
+    /**
+     *
+     * @param{FormData} formData
+     */
     const sendCsvToGetFormatted = async (formData: FormData) => {
         try {
             await fetch(`${serverUrl}/excel/csv-format`, {
@@ -231,18 +275,25 @@ const ExcelPage = () => {
                 .catch((error) => console.error("Error Testing File: ", error));
         } catch (err) {
             console.error("Error uploading: ", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const downloadFile = async (file: File, docName: string) => {
-        const blob = new Blob([file], {
+    /**
+     *
+     * @param {SyntheticEvent<HTMLFormElement>} e
+     */
+    const downloadFile = async (e: SyntheticEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const blob = new Blob([fileToDownload], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `${
-            docName.trim() !== "" ? docName.trim() : "output"
+            downloadName.trim() !== "" ? downloadName.trim() : "output"
         }.xlsx`;
         document.body.appendChild(a);
         a.click();
@@ -250,43 +301,114 @@ const ExcelPage = () => {
     };
 
     return (
-        <div className="relative w-full flex-grow flex flex-col">
+        <div
+            className={`flex w-full flex-grow flex-col ${darkMode && "dark"} overflow-x-hidden`}
+        >
+            {isLoading && (
+                <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-neutral-800/50">
+                    <div className="rounded-lg bg-neutral-200 px-40 py-20 text-3xl">
+                        Loading...
+                    </div>
+                </div>
+            )}
             {originalFile ? (
-                <div className="h-full">
-                    {parsedCSVFile.length > 0 && (
-                        <div className="flex w-full h-full">
+                <div className="h-full dark:bg-neutral-800">
+                    {parsedCSVFile.length > 0 ? (
+                        <div className="flex h-full w-full">
                             <Sidebar
                                 fileTitle={fileTitle}
                                 headers={originalHeaders}
                                 response={handleSidebarAction}
                                 csv={isCsv}
-                                loading={isLoading}
+                                isLoading={isLoading}
                             />
-                            <Excel headers={headers} file={parsedCSVFile} />
+                            <ExcelTable
+                                headers={headers}
+                                file={parsedCSVFile}
+                            />
+                        </div>
+                    ) : (
+                        <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-neutral-800/50">
+                            <div className="rounded-lg bg-neutral-200 px-40 py-20 text-center text-3xl">
+                                Loading.
+                                <br />{" "}
+                                <span className="text-md">
+                                    If your file is in xlsx or xls, try
+                                    converting it to csv...
+                                </span>
+                            </div>
                         </div>
                     )}
-                    {isLoading && (
-                        <div className="text-white text-3xl absolute left-0 top-0 z-5">
-                            Loading...
-                        </div>
-                    )}
+
                     {errorMessage && (
-                        <div className="fixed top-10 left-10 z-10 bg-white p-5 rounded-lg  text-red-500 flex justify-center items-center">
+                        <div className="fixed left-10 top-10 z-10 flex items-center justify-center rounded-lg bg-red-500 p-5 text-white">
                             {errorMessage}
                             <button
-                                className="absolute top-0 right-0 text-black flex justify-center items-center bg-neutral-200 rounded-bl-lg rounded-tr-lg w-6 h-6 hover:bg-neutral-300"
+                                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-black hover:bg-neutral-400"
                                 onClick={() => setErrorMessage("")}
                             >
-                                <span>X</span>
+                                <span className="text-xl">X</span>
                             </button>
+                        </div>
+                    )}
+                    {showDownload && (
+                        <div className="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center bg-black/60">
+                            <form
+                                className="relative flex flex-col overflow-hidden rounded border bg-neutral-100 p-4 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                                onSubmit={downloadFile}
+                            >
+                                <label htmlFor="file-name">File Name</label>
+                                <div className="flex items-end gap-0.5">
+                                    <input
+                                        placeholder="Default: output"
+                                        className="mt-1 rounded border px-2 py-1 focus:outline-none dark:border-neutral-500 dark:bg-neutral-600 dark:text-neutral-300"
+                                        name="file-name"
+                                        id="file-name"
+                                        onChange={(e) =>
+                                            setDownloadName(e.target.value)
+                                        }
+                                    />
+                                    <p className="text-neutral-600 dark:text-neutral-300">
+                                        .xlsx
+                                    </p>
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="mt-3 rounded bg-blue-600 py-1 text-white transition hover:bg-blue-500"
+                                >
+                                    Download
+                                </button>
+                                <button
+                                    onClick={() => setShowDownload(false)}
+                                    type="button"
+                                    className="absolute right-0 top-0 flex items-center justify-center rounded-bl bg-red-500 p-0.5 text-neutral-300 transition duration-75 hover:bg-red-300"
+                                >
+                                    <Close />
+                                </button>
+                            </form>
                         </div>
                     )}
                 </div>
             ) : (
-                <div ref={topBar} className="flex flex-col items-center h-full">
-                    <Dropzone fileChosen={handleFileUpload} />
+                // TODO: Make this a component or something and add more info
+                <div
+                    ref={topBar}
+                    className="flex h-full w-full flex-col items-center justify-center pb-64 dark:bg-neutral-700"
+                >
+                    <div className="w-full grow">
+                        <Hero />
+                    </div>
+                    <div className="h-1/3 w-1/2">
+                        <Dropzone fileChosen={handleFileUpload} />
+                    </div>
                 </div>
             )}
+            <button
+                className="absolute bottom-5 right-5 rounded-full bg-neutral-300 p-1.5 hover:bg-neutral-200 dark:bg-neutral-600 dark:text-white dark:hover:bg-neutral-500"
+                onClick={() => setDarkMode((prev) => !prev)}
+            >
+                {darkMode ? <DarkMode /> : <LightMode />}
+            </button>
         </div>
     );
 };

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import "./Sidebar.css";
 import { ResponseActionType } from "../../../Types/Enums/SidebarActions";
 import { RequestType } from "../../../Types/Interfaces/RequestInterface";
+import { Download } from "@mui/icons-material";
+import MultipleSelect from "../../Inputs/MultipleSelect";
+// import ParamMenu from "../Params/ParamMenu";
+import Dropdown from "../../Inputs/Dropdown";
 
 interface ResponseAction {
     action: ResponseActionType;
@@ -13,7 +16,7 @@ interface SidebarProps {
     response: (action: ResponseAction) => void;
     fileTitle: string;
     csv: boolean;
-    loading: boolean;
+    isLoading: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -21,47 +24,40 @@ const Sidebar: React.FC<SidebarProps> = ({
     response,
     fileTitle,
     csv,
-    loading = false,
+    isLoading,
 }) => {
     const [desiredChosen, setDesiredChosen] = useState(false);
     const [groupChosen, setGroupChosen] = useState(false);
     const [sortChosen, setSortChosen] = useState(false);
+    const [totalChosen, setTotalChosen] = useState(false);
+    const [avgChosen, setAvgChosen] = useState(false);
 
-    const [docName, setDocName] = useState("");
+    const [desiredItems, setDesiredItems] = useState<string[]>();
+    const [groupItem, setGroupItem] = useState<string>();
+    const [groupDirItem, setGroupDirItem] = useState<"asc" | "des">();
+    const [sortItem, setSortItem] = useState<string>();
+    const [sortDirItem, setSortDirItem] = useState<"asc" | "des">();
 
-    const [delimiter, setDelimiter] = useState("");
+    const [delimiter, setDelimiter] = useState(",");
 
-    const handleResponse = (e: React.SyntheticEvent) => {
-        e.preventDefault();
-        const target = e.target as typeof e.target & {
-            groupBy: { value: string };
-            headerColor: { value: string };
-            sortDir: { value: "asc" | "des" | undefined };
-            sortBy: { value: string };
-            desired: { selectedOptions: { value: string }[] };
-        };
-
-        const desired = desiredChosen
-            ? Array.from(target.desired.selectedOptions).map(
-                  (option) => option.value
-              )
-            : headers;
-        // const sortBy = Array.from(target.sortBy.selectedOptions).map(
-        //     (option) => option.value
-        // );
-        const sortBy = sortChosen ? target.sortBy.value : "none";
-        const sortDir = target.sortDir.value;
-        const groupBy = groupChosen ? target.groupBy.value : "none";
+    const handleResponse = () => {
+        const desired = desiredChosen ? desiredItems : headers;
+        const groupBy = groupChosen ? groupItem : "none";
+        const groupDir = groupDirItem;
+        const sortBy = sortChosen ? sortItem : "none";
+        const sortDir = sortDirItem;
 
         const objects = {
             sortDir,
             sortBy,
             groupBy,
+            groupDir,
             desired,
+            totalChosen,
+            avgChosen,
         };
 
         if (csv) {
-            console.log("Delimiter: ", delimiter);
             objects["delimiter"] = delimiter;
         }
 
@@ -83,127 +79,168 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         response({
             action: ResponseActionType.Download,
-            objects: {
-                docName,
-            },
+            objects: null,
         });
     };
 
+    // TODO: EVAL WINDOW
+    /**
+     * paramters:  sum.if, count.if, datedIf, vlookup
+     */
+
     return (
-        <div className="bg-neutral-300 w-60 flex flex-col justify-between text-black overflow-hidden text-ellipsis h-screen">
-            <div className="w-full flex flex-col">
+        <div className="flex h-screen w-64 flex-col justify-between text-ellipsis border-r border-neutral-300 bg-neutral-100 text-black dark:border-neutral-500 dark:bg-neutral-800 dark:text-neutral-200">
+            <div className="flex w-full flex-col">
+                {/* File Title */}
                 {fileTitle && (
                     <div className="mx-auto mt-2">
                         <h1 className="font-bold">{fileTitle}</h1>
                     </div>
                 )}
-                <form
-                    onSubmit={handleResponse}
-                    className="text-black w-full flex flex-col gap-2 p-2"
-                >
-                    <div className="flex gap-3 items-center">
-                        <label
-                            htmlFor="desired"
-                            className={`${
-                                !desiredChosen && "text-neutral-500"
-                            }`}
-                        >
-                            Desired Columns:{" "}
-                        </label>
-                        <input
-                            type="checkbox"
-                            onChange={() => setDesiredChosen((prev) => !prev)}
-                        />
-                    </div>
-                    <select
-                        name="desired"
-                        id="desired"
-                        multiple
-                        disabled={!desiredChosen}
-                        size={4}
-                        style={{
-                            overflowY: !desiredChosen
-                                ? "-moz-hidden-unscrollable"
-                                : "auto",
-                        }}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="flex gap-3 items-center">
-                        <label
-                            htmlFor="groupBy"
-                            className={`${!groupChosen && "text-neutral-500"}`}
-                        >
-                            Group By:
-                        </label>
-                        <input
-                            type="checkbox"
-                            onChange={() => setGroupChosen((prev) => !prev)}
-                        />
-                    </div>
-                    <select
-                        disabled={!groupChosen}
-                        name="groupBy"
-                        id="groupBy"
-                        className={`${
-                            groupChosen
-                                ? "bg-white"
-                                : "bg-neutral-200 text-neutral-500"
-                        } py-1 px-1 rounded cursor-pointer hover:bg-neutral-200`}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="flex gap-3 items-center">
-                        <p className={`${!sortChosen && "text-neutral-500"}`}>
-                            Sort{" "}
-                            <select
-                                className="pl-1 py-0.5 rounded"
-                                name="sortDir"
-                                disabled={!sortChosen}
+                <div className="flex w-full flex-col gap-5 p-2">
+                    {/* Desired Chosen */}
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <label
+                                htmlFor="desired"
+                                className={`${
+                                    !desiredChosen && "text-neutral-500"
+                                }`}
                             >
-                                <option value="asc">Ascending</option>
-                                <option value="des">Descending</option>
-                            </select>
-                        </p>
-                        <input
-                            type="checkbox"
-                            onChange={() => setSortChosen((prev) => !prev)}
+                                Desired Columns:{" "}
+                            </label>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() =>
+                                    setDesiredChosen((prev) => !prev)
+                                }
+                            />
+                        </div>
+                        {/* {memoizedMultipleSelect} */}
+                        <MultipleSelect
+                            disabled={!desiredChosen}
+                            options={headers}
+                            setItems={setDesiredItems}
                         />
                     </div>
-                    <select
-                        disabled={!sortChosen}
-                        name="sortBy"
-                        id="sortBy"
-                        className={`${
-                            sortChosen
-                                ? "bg-white"
-                                : "bg-neutral-200 text-neutral-500"
-                        } py-1 px-1 rounded cursor-pointer hover:bg-neutral-200`}
-                    >
-                        {headers.map((item) => (
-                            <option value={item} key={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
+                    {/* Group Chosen */}
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex w-full items-center gap-3 ">
+                            <div
+                                className={`${
+                                    !groupChosen
+                                        ? "text-neutral-400 dark:text-neutral-500"
+                                        : "text-neutral-800 dark:text-neutral-200"
+                                } flex w-full items-center gap-1`}
+                            >
+                                Group
+                                <div className="w-full grow">
+                                    <Dropdown
+                                        options={["asc", "desc"]}
+                                        values={["Ascending", "Descending"]}
+                                        disabled={!groupChosen}
+                                        setItem={setGroupDirItem}
+                                    />
+                                </div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() => setGroupChosen((prev) => !prev)}
+                            />
+                        </div>
+                        <Dropdown
+                            options={headers}
+                            disabled={!groupChosen}
+                            setItem={setGroupItem}
+                        />
+                    </div>
+                    {/* Sort Chosen */}
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="flex w-full items-center gap-3 ">
+                            <div
+                                className={`${
+                                    !groupChosen
+                                        ? "text-neutral-400 dark:text-neutral-500"
+                                        : "text-neutral-800 dark:text-neutral-200"
+                                } flex w-full items-center gap-1`}
+                            >
+                                Sort
+                                <div className="w-full grow">
+                                    <Dropdown
+                                        options={["asc", "desc"]}
+                                        values={["Ascending", "Descending"]}
+                                        disabled={!sortChosen}
+                                        setItem={setSortDirItem}
+                                    />
+                                </div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                onChange={() => setSortChosen((prev) => !prev)}
+                            />
+                        </div>
+                        <Dropdown
+                            options={headers}
+                            disabled={!sortChosen}
+                            setItem={setSortItem}
+                        />
+                    </div>
+                    {/* More Info */}
+                    <div className="">
+                        <h4 className="text-lg">More Column Info</h4>
+                        {/* Sum */}
+                        <div className="w-max  rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                            <input
+                                type="checkbox"
+                                id="sum"
+                                name="sum"
+                                className="mr-1 cursor-pointer"
+                                onChange={() => setTotalChosen((prev) => !prev)}
+                            />
+                            <label
+                                htmlFor="sum"
+                                className="cursor-pointer select-none"
+                            >
+                                Sum
+                            </label>
+                        </div>
+                        {/* Avg */}
+                        <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                            <input
+                                type="checkbox"
+                                id="avg"
+                                name="avg"
+                                className="mr-1 cursor-pointer"
+                                onChange={() => setAvgChosen((prev) => !prev)}
+                            />
+                            <label
+                                htmlFor="avg"
+                                className="cursor-pointer select-none"
+                            >
+                                Average
+                            </label>
+                        </div>
+                        {/* Params */}
+                        {/* <div className="w-full"> */}
+                        {/* <ParamMenu headers={headers} /> */}
+                        {/* </div> */}
+                    </div>
 
-                    {/* <label htmlFor="headerColor">Header Color: </label>
-                    <input id="headerColor" name="headerColor" type="color" /> */}
+                    {/* Delimiter */}
                     {csv && (
                         <div className="">
-                            CSV Delimiter:
+                            <span className="text-lg">CSV Delimiter:</span>
                             <select
+                                className="cursor-pointer rounded border border-neutral-300 bg-white px-1 py-1 hover:bg-neutral-200 dark:border-neutral-700 dark:bg-neutral-500 dark:text-neutral-200  dark:hover:bg-neutral-400"
+                                defaultValue={","}
                                 onChange={(e) => setDelimiter(e.target.value)}
                             >
+                                <option value="none" disabled>
+                                    Select delimiter
+                                </option>
                                 <option value=",">Comma (,)</option>
                                 <option value=";">Semicolumn (;)</option>
                                 <option value="|">Pipe (|)</option>
@@ -211,41 +248,30 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                     )}
 
+                    {/* Submit Btn */}
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="bg-green-500 rounded py-1 hover:bg-green-400"
+                        onClick={handleResponse}
+                        disabled={isLoading}
+                        className="rounded bg-green-500 py-1 hover:bg-green-400 dark:bg-green-600 dark:text-black dark:hover:bg-green-500"
                     >
                         Submit
                     </button>
-                </form>
-                <form
-                    className="text-black w-full flex flex-col gap-2 p-2"
-                    onSubmit={handleDownload}
+                </div>
+                {/* Download Btn */}
+                <button
+                    type="submit"
+                    onClick={handleDownload}
+                    className="mx-2 rounded bg-blue-500 py-1 text-black hover:bg-blue-400"
                 >
-                    <div className="flex flex-col">
-                        <label htmlFor="docName" className="">
-                            Document Name:
-                        </label>
-                        <input
-                            id="docName"
-                            name="docName"
-                            placeholder="Default: output"
-                            className="rounded py-0.5 px-1"
-                            onChange={(e) => setDocName(e.target.value)}
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 rounded py-1 hover:bg-blue-400 text-black"
-                    >
-                        Download
-                    </button>
-                </form>
+                    <Download />
+                </button>
+                {/* </form> */}
             </div>
+            {/* Close Doc Btn */}
             <button
                 onClick={handleCloseDoc}
-                className="bg-red-500 py-2 hover:bg-red-400 text-lg mx-2 mb-2 rounded"
+                className="mx-2 mb-2 rounded bg-red-500 py-2 text-lg hover:bg-red-400"
             >
                 Close Document
             </button>
