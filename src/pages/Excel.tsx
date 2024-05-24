@@ -8,15 +8,11 @@ import {
 import { ResponseActionType } from "../Types/Enums/SidebarActions";
 import Sidebar from "../components/Excel/Sidebar/Sidebar";
 
-<<<<<<< HEAD
-const serverUrl = "https://excel-back-6o83.onrender.com";
-=======
 import Dropzone from "../components/Excel/Dropzone/Dropzone";
 import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
 import Hero from "../components/Home/Hero/Hero";
 import { Close, DarkMode, LightMode } from "@mui/icons-material";
 import { checkEnv } from "../../util/envcheck";
->>>>>>> dev
 
 // const serverUrl = "http://localhost:5000";
 let uploaded = false;
