@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { SyntheticEvent, useRef, useState } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import {
@@ -12,12 +12,18 @@ import Dropzone from "../components/Excel/Dropzone/Dropzone";
 import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
 import Hero from "../components/Home/Hero/Hero";
 import { Close, DarkMode, LightMode } from "@mui/icons-material";
+import { checkEnv } from "../../util/envcheck";
 
-const serverUrl = "http://localhost:5000";
-
+// const serverUrl = "http://localhost:5000";
 let uploaded = false;
 
+interface SideBarActionProp {
+    action: ResponseActionType;
+    objects: RequestType;
+}
+
 const ExcelPage = () => {
+    const serverUrl = checkEnv("VITE_SERVER_URL");
     const [originalFile, setOriginalFile] = useState<File | undefined>();
     const [originalHeaders, setOriginalHeaders] = useState<string[]>([]);
 
@@ -38,6 +44,9 @@ const ExcelPage = () => {
 
     const topBar = useRef<HTMLDivElement>(null);
 
+    /**
+     * Resets the Excel app
+     */
     const reset = () => {
         uploaded = false;
         setOriginalFile(undefined);
@@ -52,12 +61,12 @@ const ExcelPage = () => {
         setParsedCSVFile([]);
     };
 
-    const handleSidebarAction = (data: {
-        action: ResponseActionType;
-        objects: RequestType;
-    }) => {
+    /**
+     *
+     * @param {SideBarActionProp} data
+     */
+    const handleSidebarAction = (data: SideBarActionProp) => {
         setErrorMessage("");
-        // console.log("Data: ", data);
         switch (data.action) {
             case ResponseActionType.Close:
                 reset();
@@ -73,6 +82,11 @@ const ExcelPage = () => {
         }
     };
 
+    /**
+     *
+     * @param {File} file
+     * @returns
+     */
     const handleFileUpload = async (file: File) => {
         reset();
         uploaded = true;
@@ -85,12 +99,7 @@ const ExcelPage = () => {
         setOriginalFile(file);
         setOriginalHeaders([]);
 
-        if (
-            file.name.includes(".xls") ||
-            file.name.includes(".xlsx")
-            // file?.type.split("/")[1].includes("spreadsheetml") ||
-            // file?.type.split("/")[1].includes("ms-excel")
-        ) {
+        if (file.name.includes(".xls") || file.name.includes(".xlsx")) {
             excelToCsv(file);
         } else if (file?.type.split("/")[1] === "csv") {
             setIsCsv(true);
@@ -102,6 +111,10 @@ const ExcelPage = () => {
         }
     };
 
+    /**
+     *
+     * @param {File} file
+     */
     const excelToCsv = (file: File) => {
         const reader = new FileReader();
 
@@ -137,6 +150,10 @@ const ExcelPage = () => {
         reader.readAsArrayBuffer(file);
     };
 
+    /**
+     *
+     * @param {File} file
+     */
     const parseFile = (file: File) => {
         // console.log("File: ", file);
         const reader = new FileReader();
@@ -169,6 +186,11 @@ const ExcelPage = () => {
         reader.readAsText(file);
     };
 
+    /**
+     *
+     * @param{RequestType} info
+     * @returns {void}
+     */
     const checkAndFormData = (info: RequestType) => {
         const { desired, groupBy, sortBy } = info;
         // Group Items check
@@ -178,20 +200,24 @@ const ExcelPage = () => {
             !desired.includes(groupBy)
         ) {
             setErrorMessage("Your Group By isn't in the Desired List");
-            return;
         }
         // Sort Items check
-        if (
+        else if (
             sortBy !== "none" &&
             desired.length > 0 &&
             !desired.includes(sortBy)
         ) {
             setErrorMessage("Your Sorty By isn't in the Desired List");
-            return;
+        } else {
+            handleFileManagement(info);
         }
-        handleFileManagement(info);
     };
 
+    /**
+     *
+     * @param {RequestType} info
+     * @returns {Promise<void>}
+     */
     const handleFileManagement = async (info: RequestType) => {
         try {
             setIsLoading(true);
@@ -222,6 +248,10 @@ const ExcelPage = () => {
         }
     };
 
+    /**
+     *
+     * @param{FormData} formData
+     */
     const sendCsvToGetFormatted = async (formData: FormData) => {
         try {
             await fetch(`${serverUrl}/excel/csv-format`, {
@@ -246,7 +276,11 @@ const ExcelPage = () => {
         }
     };
 
-    const downloadFile = async (e) => {
+    /**
+     *
+     * @param {SyntheticEvent<HTMLFormElement>} e
+     */
+    const downloadFile = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         const blob = new Blob([fileToDownload], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -39,6 +39,7 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
         }
     };
 
+    // Click outside of menu
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
 
@@ -47,14 +48,14 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
         };
     }, [isMenuShowing]);
 
-    //TODO: Fix menu getting bigger with items in the list but in disabled 
+    //TODO: Fix menu getting bigger with items in the list but in disabled
     return (
         <div className="relative w-full" ref={menuRef}>
             <div
                 className={`flex w-full flex-wrap justify-between ${isMenuShowing && "bg-neutral-200"} ${disabled ? "bg-neutral-200 text-neutral-400 dark:bg-neutral-600" : " dark:bg-neutral-700 "} overflow-hidden rounded border border-neutral-300 dark:border-neutral-500`}
             >
                 <div
-                    className={`flex flex-1 flex-wrap ${selectedItems.length == 0 ? "items-start" : "p-1"} items-start gap-1`}
+                    className={`flex flex-1 flex-wrap ${selectedItems.length == 0 ? "items-start" : !disabled ? "p-1" : "p-0.5"} items-start gap-1`}
                 >
                     {!disabled ? (
                         selectedItems.length > 0 ? (
@@ -62,7 +63,7 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
                                 <button
                                     type="button"
                                     disabled={disabled}
-                                    className={`${disabled ? "bg-neutral-200 text-neutral-400 dark:bg-neutral-600 " : "bg-blue-200 hover:bg-blue-300 dark:bg-blue-400 dark:text-black"} flex h-5 w-max items-center justify-between gap-1 rounded-lg  px-1.5 text-xs`}
+                                    className={`${disabled ? "bg-neutral-200 text-neutral-400 dark:bg-neutral-600 " : "bg-blue-200 hover:bg-blue-300 dark:bg-blue-400 dark:text-black"} flex h-5 w-max items-center justify-between gap-1 rounded-lg px-1.5 text-xs`}
                                     key={item}
                                     onClick={() => toggleItem(item)}
                                 >
@@ -79,7 +80,7 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
                                 onClick={() =>
                                     setIsMenuShowing((prev) => !prev)
                                 }
-                                className={`${!disabled && "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-500"} w-full py-0.5 pl-1`}
+                                className={`${!disabled && "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-500"} h-full w-full pl-1`}
                             >
                                 No Columns Chosen
                             </span>
@@ -87,7 +88,7 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
                     ) : (
                         <span
                             onClick={() => setIsMenuShowing((prev) => !prev)}
-                            className={`${!disabled && "cursor-pointer hover:bg-neutral-200 "} w-full py-0.5 pl-1`}
+                            className={`${!disabled && "cursor-pointer hover:bg-neutral-200 "} w-full pl-1`}
                         >
                             All Columns
                         </span>
@@ -104,7 +105,7 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
             </div>
             {/* Menu */}
             <div
-                className={`${isMenuShowing ? "visible" : "invisible"} absolute top-7 max-h-52 w-full cursor-pointer overflow-y-auto rounded-lg border bg-white p-0.5 shadow shadow-neutral-500 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-none`}
+                className={`${isMenuShowing ? "visible" : "invisible"} absolute top-7 z-50 max-h-52 w-full cursor-pointer overflow-y-auto rounded-lg border bg-white ${!disabled && "p-0.5"} shadow shadow-neutral-500 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-none`}
             >
                 {options.map((item) => (
                     <p
