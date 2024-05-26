@@ -1,20 +1,21 @@
 import { SyntheticEvent, useRef, useState } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import { Close, DarkMode, LightMode } from "@mui/icons-material";
+
+import Sidebar from "../components/Excel/Sidebar/Sidebar";
+import Dropzone from "../components/Excel/Dropzone/Dropzone";
+import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
+import Hero from "../components/Home/Hero/Hero";
+
+import { checkEnv } from "../../util/envcheck";
+
 import {
     ParsedCSVRow,
     RequestType,
 } from "../types/Interfaces/RequestInterface";
 import { ResponseActionType } from "../types/Enums/SidebarActions";
-import Sidebar from "../components/Excel/Sidebar/Sidebar";
 
-import Dropzone from "../components/Excel/Dropzone/Dropzone";
-import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
-import Hero from "../components/Home/Hero/Hero";
-import { Close, DarkMode, LightMode } from "@mui/icons-material";
-import { checkEnv } from "../../util/envcheck";
-
-// const serverUrl = "http://localhost:5000";
 let uploaded = false;
 
 interface SideBarActionProp {
