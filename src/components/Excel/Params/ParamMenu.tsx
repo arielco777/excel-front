@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import Dropdown from "../../Inputs/Dropdown";
-import { Add, Delete } from "@mui/icons-material";
+import { Add } from "@mui/icons-material";
+
+const equalizerList = [">", "<", ">=", "<=", "==", "!="] as const;
+const params = ["addIf", "countIf", "vLoopkup"];
+type Equalizer = (typeof equalizerList)[number];
 
 interface MenuItemProp {
     param: string;
     column: string;
-    equalizer: ">" | "<" | ">=" | "<=" | "==" | "!=" | "";
+    equalizer: Equalizer;
     equalTo: string | number;
 }
 
@@ -14,7 +18,6 @@ interface ParamMenuProp {
     className?: string;
 }
 
-const equalizerList = [">", "<", ">=", "<=", "==", "!="];
 // const equalizerName = [
 //     "Greater than",
 //     "Lesser than",
@@ -26,28 +29,23 @@ const equalizerList = [">", "<", ">=", "<=", "==", "!="];
 
 const ParamMenu: React.FC<ParamMenuProp> = ({ headers, className = "" }) => {
     const [isMenuShowing, setIsMenuShowing] = useState(false);
-    const [menuItems, setMenuItems] = useState<MenuItemProp[]>([
-        {
-            param: "",
-            column: "",
-            equalizer: "",
-            equalTo: "",
-        },
-    ]);
+    const [menuItems, setMenuItems] = useState<MenuItemProp[]>([]);
     const menuRef = useRef(null);
+    const [newItem, setNewItem] = useState<MenuItemProp>({
+        param: "",
+        column: "",
+        equalizer: ">",
+        equalTo: "",
+    });
 
-    const handleChangeItems = (index: number, key: string, value: string) => {
-        setMenuItems((prev) =>
-            prev.map((item, idx) =>
-                idx === index ? { ...item, [key]: value } : item,
-            ),
-        );
-    };
+    // const handleAddItems = (key: string, value: string) => {
+    //     const newItem = setMenuItems((prev) => [...prev]);
+    // };
 
     const addItem = () => {
         const newItem: MenuItemProp = {
             param: "",
-            equalizer: "",
+            equalizer: equalizerList[0],
             equalTo: "",
             column: "",
         };
@@ -91,30 +89,54 @@ const ParamMenu: React.FC<ParamMenuProp> = ({ headers, className = "" }) => {
                 className={`absolute ${isMenuShowing ? "visible" : "invisible"} left-0 top-8 z-50 min-w-max rounded border p-1 dark:border-neutral-500 dark:bg-neutral-800`}
             >
                 <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-3">
+                        <Dropdown
+                            showArrow={false}
+                            options={params}
+                            setItem={(data: string) =>
+                                setNewItem((prev) => ({
+                                    ...prev,
+                                    param: data,
+                                }))
+                            }
+                        />
+                        <Dropdown
+                            className="z-50 min-w-max"
+                            showArrow={false}
+                            options={headers}
+                            setItem={(data: string) =>
+                                setNewItem((prev) => ({
+                                    ...prev,
+                                    column: data,
+                                }))
+                            }
+                        />
+                        <Dropdown
+                            options={[...equalizerList]}
+                            showArrow={false}
+                            // values={equalizerName}
+                            setItem={(data: string) =>
+                                setNewItem((prev) => ({
+                                    ...prev,
+                                    equalizer: data as Equalizer,
+                                }))
+                            }
+                        />
+                        <input
+                            onChange={(e) =>
+                                setNewItem((prev) => ({
+                                    ...prev,
+                                    equalTo: e.target.value,
+                                }))
+                            }
+                            className="dark: w-20 rounded border dark:border-neutral-500 dark:bg-neutral-700"
+                        />
+                        <button>
+                            <Add />
+                        </button>
+                    </div>
                     {menuItems.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                            <Dropdown
-                                className="z-50 min-w-max"
-                                showArrow={false}
-                                options={headers}
-                                setItem={(data: string) =>
-                                    handleChangeItems(idx, "column", data)
-                                }
-                                defaultValue={item.column}
-                            />
-                            <Dropdown
-                                options={equalizerList}
-                                showArrow={false}
-                                // values={equalizerName}
-                                setItem={(data: string) =>
-                                    handleChangeItems(idx, "equalizer", data)
-                                }
-                            />
-                            <input className="dark: w-20 rounded border dark:border-neutral-500 dark:bg-neutral-700" />
-                            <button onClick={() => removeItem(idx)}>
-                                <Delete />
-                            </button>
-                        </div>
+                        <div key={idx}></div>
                     ))}
                 </div>
                 <div className="w-full py-1">

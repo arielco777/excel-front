@@ -4,8 +4,8 @@ import * as XLSX from "xlsx";
 import {
     ParsedCSVRow,
     RequestType,
-} from "../Types/Interfaces/RequestInterface";
-import { ResponseActionType } from "../Types/Enums/SidebarActions";
+} from "../types/Interfaces/RequestInterface";
+import { ResponseActionType } from "../types/Enums/SidebarActions";
 import Sidebar from "../components/Excel/Sidebar/Sidebar";
 
 import Dropzone from "../components/Excel/Dropzone/Dropzone";

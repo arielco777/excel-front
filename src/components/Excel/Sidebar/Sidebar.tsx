@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { ResponseActionType } from "../../../Types/Enums/SidebarActions";
-import { RequestType } from "../../../Types/Interfaces/RequestInterface";
+import { ResponseActionType } from "../../../types/Enums/SidebarActions";
+import { RequestType } from "../../../types/Interfaces/RequestInterface";
 import { Download } from "@mui/icons-material";
 import MultipleSelect from "../../Inputs/MultipleSelect";
 import ParamMenu from "../Params/ParamMenu";
