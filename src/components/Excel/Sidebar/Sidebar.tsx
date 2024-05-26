@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { ResponseActionType } from "../../../Types/Enums/SidebarActions";
-import { RequestType } from "../../../Types/Interfaces/RequestInterface";
+// import { ResponseActionType } from "../../../types/Enums/SidebarActions";
+// import { RequestType } from "../../../types/Interfaces/RequestInterface";
 import { Download } from "@mui/icons-material";
 import MultipleSelect from "../../Inputs/MultipleSelect";
 // import ParamMenu from "../Params/ParamMenu";
 import Dropdown from "../../Inputs/Dropdown";
-
+import { ResponseActionType } from "../../../types/Enums/SidebarActions";
+import { RequestType } from "../../../types/Interfaces/RequestInterface";
+import ParamMenu from "../Params/ParamMenu";
 interface ResponseAction {
     action: ResponseActionType;
     objects: RequestType | null;
@@ -29,8 +31,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [desiredChosen, setDesiredChosen] = useState(false);
     const [groupChosen, setGroupChosen] = useState(false);
     const [sortChosen, setSortChosen] = useState(false);
-    const [totalChosen, setTotalChosen] = useState(false);
-    const [avgChosen, setAvgChosen] = useState(false);
+    // const [totalChosen, setTotalChosen] = useState(false);
+    // const [avgChosen, setAvgChosen] = useState(false);
 
     const [desiredItems, setDesiredItems] = useState<string[]>();
     const [groupItem, setGroupItem] = useState<string>();
@@ -39,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [sortDirItem, setSortDirItem] = useState<"asc" | "des">();
 
     const [delimiter, setDelimiter] = useState(",");
+    const [parameters, setParameters] = useState([]);
 
     const handleResponse = () => {
         const desired = desiredChosen ? desiredItems : headers;
@@ -53,8 +56,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             groupBy,
             groupDir,
             desired,
-            totalChosen,
-            avgChosen,
+            // totalChosen,
+            // avgChosen,
+            parameters,
         };
 
         if (csv) {
@@ -82,11 +86,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             objects: null,
         });
     };
-
-    // TODO: EVAL WINDOW
-    /**
-     * paramters:  sum.if, count.if, datedIf, vlookup
-     */
 
     return (
         <div className="flex h-screen w-64 flex-col justify-between text-ellipsis border-r border-neutral-300 bg-neutral-100 text-black dark:border-neutral-500 dark:bg-neutral-800 dark:text-neutral-200">
@@ -190,8 +189,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     {/* More Info */}
                     <div className="">
-                        <h4 className="text-lg">More Column Info</h4>
-                        {/* Sum */}
+                        {/* <h4 className="text-lg">More Column Info</h4> */}
+                        {/* Sum
                         <div className="w-max  rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
                             <input
                                 type="checkbox"
@@ -208,7 +207,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </label>
                         </div>
                         {/* Avg */}
-                        <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                        {/* <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
                             <input
                                 type="checkbox"
                                 id="avg"
@@ -222,11 +221,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                             >
                                 Average
                             </label>
-                        </div>
+                        </div>  */}
+
                         {/* Params */}
-                        {/* <div className="w-full"> */}
-                        {/* <ParamMenu headers={headers} /> */}
-                        {/* </div> */}
+                        <div className="w-full">
+                            <ParamMenu
+                                headers={headers}
+                                setParameters={setParameters}
+                            />
+                        </div>
                     </div>
 
                     {/* Delimiter */}

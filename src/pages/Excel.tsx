@@ -1,20 +1,21 @@
 import { SyntheticEvent, useRef, useState } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import {
-    ParsedCSVRow,
-    RequestType,
-} from "../Types/Interfaces/RequestInterface";
-import { ResponseActionType } from "../Types/Enums/SidebarActions";
-import Sidebar from "../components/Excel/Sidebar/Sidebar";
+import { Close, DarkMode, LightMode } from "@mui/icons-material";
 
+import Sidebar from "../components/Excel/Sidebar/Sidebar";
 import Dropzone from "../components/Excel/Dropzone/Dropzone";
 import ExcelTable from "../components/Excel/ExcelTable/ExcelComponent";
 import Hero from "../components/Home/Hero/Hero";
-import { Close, DarkMode, LightMode } from "@mui/icons-material";
+
 import { checkEnv } from "../../util/envcheck";
 
-// const serverUrl = "http://localhost:5000";
+import {
+    ParsedCSVRow,
+    RequestType,
+} from "../types/Interfaces/RequestInterface";
+import { ResponseActionType } from "../types/Enums/SidebarActions";
+
 let uploaded = false;
 
 interface SideBarActionProp {
@@ -294,6 +295,8 @@ const ExcelPage = () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        setDownloadName("");
+        setShowDownload(false);
     };
 
     return (
