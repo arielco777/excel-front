@@ -30,8 +30,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [desiredChosen, setDesiredChosen] = useState(false);
     const [groupChosen, setGroupChosen] = useState(false);
     const [sortChosen, setSortChosen] = useState(false);
-    const [totalChosen, setTotalChosen] = useState(false);
-    const [avgChosen, setAvgChosen] = useState(false);
+    // const [totalChosen, setTotalChosen] = useState(false);
+    // const [avgChosen, setAvgChosen] = useState(false);
 
     const [desiredItems, setDesiredItems] = useState<string[]>();
     const [groupItem, setGroupItem] = useState<string>();
@@ -55,8 +55,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             groupBy,
             groupDir,
             desired,
-            totalChosen,
-            avgChosen,
+            // totalChosen,
+            // avgChosen,
             parameters,
         };
 
