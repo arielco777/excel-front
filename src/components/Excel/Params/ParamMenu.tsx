@@ -3,7 +3,7 @@ import Dropdown from "../../Inputs/Dropdown";
 import { Add, Delete } from "@mui/icons-material";
 
 const equalizerList = [">", "<", ">=", "<=", "==", "!="] as const;
-const params = ["ADD_IF", "COUNT_IF", "VLOOKUP"] as const;
+const params = ["ADD_IF", "COUNT_IF", "VLOOKUP", "SHOW_IF"] as const;
 type Equalizer = (typeof equalizerList)[number];
 type Params = (typeof params)[number];
 
@@ -98,7 +98,7 @@ const ParamMenu: React.FC<ParamMenuProp> = ({
                 type="button"
                 className="w-full cursor-pointer select-none rounded border border-neutral-300 py-0.5 text-center hover:bg-neutral-200 dark:border-neutral-500 dark:bg-neutral-700 dark:hover:bg-neutral-500"
             >
-                Add Special Params
+                Filters and Params
             </button>
 
             <div

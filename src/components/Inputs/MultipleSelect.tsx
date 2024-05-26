@@ -76,22 +76,17 @@ const MultipleSelect: FC<MultipleSelectProp> = ({
                                 </button>
                             ))
                         ) : (
-                            <span
+                            <button
                                 onClick={() =>
                                     setIsMenuShowing((prev) => !prev)
                                 }
-                                className={`${!disabled && "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-500"} h-full w-full pl-1`}
+                                className={` h-full w-full py-1 pl-1 text-left`}
                             >
                                 No Columns Chosen
-                            </span>
+                            </button>
                         )
                     ) : (
-                        <span
-                            onClick={() => setIsMenuShowing((prev) => !prev)}
-                            className={`${!disabled && "cursor-pointer hover:bg-neutral-200 "} w-full pl-1`}
-                        >
-                            All Columns
-                        </span>
+                        <span className={`w-full py-1 pl-1`}>All Columns</span>
                     )}
                 </div>
                 <button

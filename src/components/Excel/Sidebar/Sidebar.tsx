@@ -188,8 +188,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     {/* More Info */}
                     <div className="">
-                        <h4 className="text-lg">More Column Info</h4>
-                        {/* Sum */}
+                        {/* <h4 className="text-lg">More Column Info</h4> */}
+                        {/* Sum
                         <div className="w-max  rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
                             <input
                                 type="checkbox"
@@ -206,7 +206,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </label>
                         </div>
                         {/* Avg */}
-                        <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
+                        {/* <div className="w-max rounded px-2 hover:bg-neutral-200 dark:hover:bg-neutral-500">
                             <input
                                 type="checkbox"
                                 id="avg"
@@ -220,7 +220,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                             >
                                 Average
                             </label>
-                        </div>
+                        </div>  */}
+
                         {/* Params */}
                         <div className="w-full">
                             <ParamMenu

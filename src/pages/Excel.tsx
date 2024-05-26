@@ -295,6 +295,8 @@ const ExcelPage = () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        setDownloadName("");
+        setShowDownload(false);
     };
 
     return (

@@ -57,21 +57,19 @@ const Dropdown: React.FC<DropdownProps> = ({
                     className={`flex w-max flex-1 flex-wrap ${selectedItem === "" ? "items-start" : ""} items-start gap-1 `}
                 >
                     {!disabled ? (
-                        <span
+                        <button
                             onClick={() => setIsMenuShowing((prev) => !prev)}
-                            className={`${!disabled && "cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-500"} w-full px-1 py-0.5`}
+                            className={`${!disabled && "cursor-pointer text-left hover:bg-neutral-200 dark:hover:bg-neutral-500"} w-full px-1 py-0.5`}
+                            disabled={disabled}
                         >
                             {selectedItem !== ""
                                 ? selectedItem
                                 : defaultValue
                                   ? defaultValue
                                   : "No Columns Chosen"}
-                        </span>
+                        </button>
                     ) : (
-                        <span
-                            onClick={() => setIsMenuShowing((prev) => !prev)}
-                            className={`${!disabled && "cursor-pointer hover:bg-neutral-200 "} w-full py-0.5 pl-1`}
-                        >
+                        <span className={`w-full py-0.5 pl-1`}>
                             None Chosen
                         </span>
                     )}
