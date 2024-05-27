@@ -3,7 +3,7 @@ import Dropdown from "../../Inputs/Dropdown";
 import { Add, Delete } from "@mui/icons-material";
 
 const equalizerList = [">", "<", ">=", "<=", "==", "!="] as const;
-const params = ["ADD_IF", "COUNT_IF", "VLOOKUP", "SHOW_IF"] as const;
+const params = ["ADD_IF", "COUNT_IF", "SHOW_IF"] as const;
 type Equalizer = (typeof equalizerList)[number];
 type Params = (typeof params)[number];
 
