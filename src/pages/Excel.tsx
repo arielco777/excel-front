@@ -60,6 +60,8 @@ const ExcelPage = () => {
 
         setHeaders([]);
         setParsedCSVFile([]);
+
+        setDownloadName("");
     };
 
     /**
